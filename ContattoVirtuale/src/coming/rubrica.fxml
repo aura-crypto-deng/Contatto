@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="coming.Main"
+      spacing="10"
+      alignment="TOP_CENTER"
+      style="-fx-padding: 15;">
+
+    <Label text="RUBRICA TELEFONICA" style="-fx-font-size: 20; -fx-font-weight: bold;"/>
+
+    <Separator/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Cerca:"/>
+        <TextField fx:id="campoRicerca" promptText="Nome o cognome..." HBox.hgrow="ALWAYS"/>
+        <Button text="Pulisci" onAction="#pulisciRicerca"/>
+    </HBox>
+
+    <Label text="Elenco contatti:"/>
+    <ListView fx:id="listaContatti" prefHeight="250" VBox.vgrow="ALWAYS"/>
+
+    <Separator/>
+
+    <TitledPane text="Aggiungi nuovo contatto" animated="false" collapsible="false">
+        <GridPane hgap="10" vgap="8" style="-fx-padding: 10;">
+            <Label text="Tipo:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="comboTipo" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Personale"/>
+                        <String fx:value="Aziendale"/>
+                    </FXCollections>
+                </items>
+            </ComboBox>
+
+            <Label text="Nome:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="campoNome" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+            <Label text="Cognome:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <TextField fx:id="campoCognome" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+            <Label text="Telefono:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <TextField fx:id="campoTelefono" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+            <Label fx:id="labelExtra1" text="Email:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+            <TextField fx:id="campoExtra1" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+            <Label fx:id="labelExtra2" text="Compleanno:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+            <TextField fx:id="campoExtra2" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+            <Button text="Aggiungi Contatto" onAction="#aggiungiContatto"
+                    GridPane.rowIndex="6" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+        </GridPane>
+    </TitledPane>
+
+    <Button text="Elimina selezionato" onAction="#eliminaContatto"/>
+
+</VBox>
