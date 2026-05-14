@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 public class Main extends Application {
 	@FXML TextField campoRicerca;
@@ -43,10 +44,8 @@ public class Main extends Application {
     }
     @FXML
     public void initialize() throws FileNotFoundException, IOException {
-    	System.out.println("metodo chimato");
     	comboTipo.getItems().addAll("Personale", "Aziendale");
         comboTipo.setValue("Personale");
-        
         comboTipo.valueProperty().addListener((obs, vecchio, nuovo) -> {
             if (nuovo.equals("Personale")) {
                 labelExtra1.setText("Email:");
@@ -96,6 +95,18 @@ public class Main extends Application {
                 	 }
                  }
     	 	}
+    }
+    void salvaSuFile() {
+        try {
+            PrintWriter scrittore = new PrintWriter(new FileWriter(nomeFile));
+            for (Contatto c : rubrica) {
+                scrittore.println(c.toCSV());
+            }
+            scrittore.close();
+            System.out.println("Salvati " + rubrica.size() + " contatti");
+        } catch (IOException e) {
+            System.err.println("Errore salvataggio: " + e.getMessage());
+        }
     }
     @FXML
     public void aggiungiContatto() {
