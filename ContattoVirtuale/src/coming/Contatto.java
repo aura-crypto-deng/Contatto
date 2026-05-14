@@ -10,13 +10,14 @@ public abstract class Contatto {
         this.cognome = cognome;
         this.telefono = telefono;
     }
-    
-    public String getNome() { return nome; }
-    public String getCognome() { return cognome; }
-    public String getTelefono() { return telefono; }
-    
-    public abstract String getTipo();
-    public abstract String toCSV();
+    public Contatto(String riga) {
+    	String [] parti= riga.split(",");
+    	nome =parti[0];
+    	cognome= parti[1];
+    	telefono=parti[2];
+    }
+    public void 
+
     
     @Override
     public String toString() {

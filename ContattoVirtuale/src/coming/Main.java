@@ -1,20 +1,20 @@
 package coming;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
-
 public class Main extends Application {
-
-    @FXML TextField campoRicerca;
+	@FXML TextField campoRicerca;
     @FXML ListView<Contatto> listaContatti;
     @FXML ComboBox<String> comboTipo;
     @FXML TextField campoNome;
@@ -22,171 +22,93 @@ public class Main extends Application {
     @FXML TextField campoTelefono;
     @FXML TextField campoExtra1;
     @FXML TextField campoExtra2;
+    @FXML TextField campoRuolo;
     @FXML Label labelExtra1;
     @FXML Label labelExtra2;
-
-    ObservableList<Contatto> rubrica;
-    ObservableList<Contatto> listaFiltrata;
-    String nomeFile = "rubrica.csv";
-
+    @FXML Label labelRuolo;
+    String nomeFile=("/Users/deng/Desktop/rubrica.csv");
+    ArrayList<Contatto> rubrica= new ArrayList();
+    @Override
     public void start(Stage finestra) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("rubrica.fxml"));
-        loader.setController(this);
-        VBox radice = loader.load();
-        Scene scena = new Scene(radice, 520, 650);
+        Parent root = loader.load();
+        Scene scena = new Scene(root, 520, 650);
         finestra.setTitle("Rubrica Telefonica");
         finestra.setScene(scena);
-        finestra.show();
+        finestra.show();           
+                    
     }
-
+    public static void main(String[] args) {
+        launch(args);
+    }
     @FXML
-    public void initialize() {
-        rubrica = FXCollections.observableArrayList(caricaDaFile());
-        listaFiltrata = FXCollections.observableArrayList(rubrica);
-        listaContatti.setItems(listaFiltrata);
-
-        campoRicerca.textProperty().addListener((obs, vecchio, nuovo) -> {
-            filtraLista();
-        });
-
+    public void initialize() throws FileNotFoundException, IOException {
+    	System.out.println("metodo chimato");
+    	comboTipo.getItems().addAll("Personale", "Aziendale");
+        comboTipo.setValue("Personale");
+        
         comboTipo.valueProperty().addListener((obs, vecchio, nuovo) -> {
             if (nuovo.equals("Personale")) {
                 labelExtra1.setText("Email:");
                 labelExtra2.setText("Compleanno:");
+                labelRuolo.setVisible(false);
+                campoRuolo.setVisible(false);
                 campoExtra1.setPromptText("email@esempio.it");
                 campoExtra2.setPromptText("gg/mm/aaaa");
             } else {
                 labelExtra1.setText("Azienda:");
-                labelExtra2.setText("Ruolo:");
+                labelExtra2.setText("Sede:");
+                labelRuolo.setVisible(true);
+                campoRuolo.setVisible(true);
                 campoExtra1.setPromptText("Nome azienda");
-                campoExtra2.setPromptText("Ruolo lavorativo");
+                campoExtra2.setPromptText("Sede");
+                campoRuolo.setPromptText("Ruolo lavorativo");
             }
         });
-
-        comboTipo.setValue("Personale");
+        
+        labelRuolo.setVisible(false);
+        campoRuolo.setVisible(false);
+        caricaDaFile();
+    
     }
-
-    ArrayList<Contatto> caricaDaFile() {
-        ArrayList<Contatto> rubrica = new ArrayList<Contatto>();
-        File file = new File(nomeFile);
-
-        if (!file.exists()) {
-            return rubrica;
+    void caricaDaFile() throws FileNotFoundException, IOException{
+    	File mioFile= new File(nomeFile);
+    	String rigaletta;
+    	if (!mioFile.exists()) {
+            campoRicerca.setText("File non trovato, rubrica vuota");
         }
-
-        try {
-            BufferedReader lettore = new BufferedReader(new FileReader(file));
-            String linea;
-            while ((linea = lettore.readLine()) != null) {
-                String[] parti = linea.split(",");
-                if (parti[0].equals("Personale") && parti.length == 5) {
-                    ContattoPersonale c = new ContattoPersonale(parti[1], parti[2], parti[3], parti[4]);
-                    rubrica.add(c);
-                }
-                else if (parti[0].equals("Aziendale") && parti.length == 6) {
-                    ContattoAziendale c = new ContattoAziendale(parti[1], parti[2], parti[3], parti[4], parti[5]);
-                    rubrica.add(c);
-                }
-                else if (parti[0].equals("Base") && parti.length == 4) {
-                    Contatto c = new Contatto(parti[1], parti[2], parti[3]);
-                    rubrica.add(c);
-                }
-            }
-            lettore.close();
-        } catch (IOException e) {
-            System.err.println("Errore lettura: " + e.getMessage());
-        }
-        return rubrica;
+    	 try (
+                 FileReader leggo = new FileReader(mioFile);
+                 BufferedReader lettoreDiRighe = new BufferedReader(leggo);
+             ){
+                 while((rigaletta = lettoreDiRighe.readLine()) != null) {
+                	 String [] parti=rigaletta.split(",");
+                	 if(parti[0].equalsIgnoreCase("Personale")) {
+                	 String email = parti[4];
+                     String compleanno = parti[5];
+                     ContattoPersonale icPersonali = new ContattoPersonale(parti[1], parti[2], parti[3], email, compleanno);
+                     rubrica.add(icPersonali);
+                	 }else if (parti[0].equals("Aziendale") && parti.length >= 6) {
+                         String azienda = parti[4];
+                         String ruolo = parti[5];
+                         ContattoAziendale c = new ContattoAziendale(parti[1], parti[2], parti[3], azienda, ruolo);
+                         rubrica.add(c);
+                	 }
+                 }
+    	 	}
     }
-
-    void salvaSuFile() {
-        try {
-            PrintWriter scrittore = new PrintWriter(new FileWriter(nomeFile));
-            for (int i = 0; i < rubrica.size(); i++) {
-                scrittore.println(rubrica.get(i).toCSV());
-            }
-            scrittore.close();
-        } catch (IOException e) {
-            System.err.println("Errore salvataggio: " + e.getMessage());
-        }
-    }
-
-    void filtraLista() {
-        String testo = campoRicerca.getText().toLowerCase();
-        listaFiltrata.clear();
-
-        if (testo.isEmpty()) {
-            listaFiltrata.addAll(rubrica);
-        } else {
-            for (int i = 0; i < rubrica.size(); i++) {
-                Contatto c = rubrica.get(i);
-                if (c.nome.toLowerCase().contains(testo) || c.cognome.toLowerCase().contains(testo)) {
-                    listaFiltrata.add(c);
-                }
-            }
-        }
-    }
-
     @FXML
-    void aggiungiContatto() {
-        if (campoNome.getText().isEmpty() || campoCognome.getText().isEmpty() || campoTelefono.getText().isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Nome, cognome e telefono sono obbligatori!", ButtonType.OK);
-            alert.showAndWait();
-            return;
-        }
-
-        String tipo = comboTipo.getValue();
-        String nome = campoNome.getText();
-        String cognome = campoCognome.getText();
-        String telefono = campoTelefono.getText();
-        String extra1 = campoExtra1.getText();
-        String extra2 = campoExtra2.getText();
-
-        Contatto nuovo;
-
-        if (tipo.equals("Personale")) {
-            nuovo = new ContattoPersonale(nome, cognome, telefono, extra1);
-        } else {
-            if (extra1.isEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "L'azienda è obbligatoria!", ButtonType.OK);
-                alert.showAndWait();
-                return;
-            }
-            nuovo = new ContattoAziendale(nome, cognome, telefono, extra1, extra2);
-        }
-
-        rubrica.add(nuovo);
-        salvaSuFile();
-
-        campoNome.clear();
-        campoCognome.clear();
-        campoTelefono.clear();
-        campoExtra1.clear();
-        campoExtra2.clear();
-
-        filtraLista();
+    public void aggiungiContatto() {
+        System.out.println("Contatto aggiunto");
     }
-
     @FXML
-    void eliminaContatto() {
-        Contatto selezionato = listaContatti.getSelectionModel().getSelectedItem();
-        if (selezionato != null) {
-            rubrica.remove(selezionato);
-            salvaSuFile();
-            filtraLista();
-        } else {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Seleziona un contatto dalla lista!", ButtonType.OK);
-            alert.showAndWait();
-        }
+    public void eliminaContatto() {
+        System.out.println("Contatto eliminato");
     }
-
     @FXML
-    void pulisciRicerca() {
+    public void pulisciRicerca() {
         campoRicerca.clear();
-        filtraLista();
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }
+
+  
