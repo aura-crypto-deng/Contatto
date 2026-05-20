@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane hgap="10" style="-fx-padding: 15;" vgap="10" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="coming.Main">
+<GridPane hgap="10" style="-fx-padding: 15;" vgap="10" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="coming.RubricaPerfetta">
 
     <Label style="-fx-font-size: 20; -fx-font-weight: bold;" text="RUBRICA CONTATTI" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="0" />
 
@@ -21,7 +21,7 @@
     <Button onAction="#pulisciRicerca" text="Pulisci" GridPane.columnIndex="2" GridPane.rowIndex="2" />
 
     <Label text="Elenco contatti:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-    <ListView fx:id="listaContatti" prefHeight="200" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="4" />
+   <ListView fx:id="listaContatti" onMouseClicked="#modificaContatto" prefHeight="200" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="4" />
 
     <Separator GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="5" />
 

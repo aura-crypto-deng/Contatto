@@ -20,14 +20,10 @@ public class ContattoPersonale extends Contatto {
         return "Personale";
     }
 
-    public String toCSV() {
-        return getTipo() + "," + nome + "," + cognome + "," + telefono + "," + email + "," + compleanno;
-    }
-
     public String toString() {
         if (compleanno != null && !compleanno.isEmpty()) {
-            return "[Personale] " + nome + " " + cognome + " - " + telefono + " - " + email + " (" + compleanno + ")";
+            return getTipo() + "," + nome + "," + cognome + "," + telefono + "," + email + "," + compleanno;
         }
-        return "[Personale] " + nome + " " + cognome + " - " + telefono + " - " + email;
+        return getTipo() + "," + nome + "," + cognome + "," + telefono + "," + email;
     }
 }

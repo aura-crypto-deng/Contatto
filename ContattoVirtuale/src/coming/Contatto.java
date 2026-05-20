@@ -16,7 +16,9 @@ public abstract class Contatto {
     	cognome= parti[1];
     	telefono=parti[2];
     }
-    public void 
+    public String getTipo() {
+        return "Base";
+    }
 
     
     @Override

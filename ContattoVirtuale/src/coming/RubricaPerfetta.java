@@ -1,0 +1,320 @@
+package coming;
+
+import javafx.application.Application;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.Parent;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+
+public class RubricaPerfetta extends Application {
+
+    @FXML TextField campoRicerca;
+    @FXML ListView<Contatto> listaContatti;
+    @FXML ComboBox<String> comboTipo;
+    @FXML TextField campoNome;
+    @FXML TextField campoCognome;
+    @FXML TextField campoTelefono;
+    @FXML TextField campoExtra1;
+    @FXML TextField campoExtra2;
+    @FXML TextField campoRuolo;
+    @FXML Label labelExtra1;
+    @FXML Label labelExtra2;
+    @FXML Label labelRuolo;
+
+    String nomeFile = "/Users/nishuli/Desktop/rubrica.csv";
+    ArrayList<Contatto> rubrica = new ArrayList<>();
+
+    @Override
+    public void start(Stage finestra) throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("rubrica.fxml"));
+        Parent root = loader.load();
+        Scene scena = new Scene(root, 520, 650);
+        finestra.setTitle("Rubrica Telefonica");
+        finestra.setScene(scena);
+        finestra.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    @FXML
+    public void initialize() throws FileNotFoundException, IOException {
+        comboTipo.getItems().addAll("Personale", "Aziendale");
+        comboTipo.setValue("Personale");
+
+        comboTipo.valueProperty().addListener((obs, vecchio, nuovo) -> {
+            if (nuovo.equals("Personale")) {
+                labelExtra1.setText("Email:");
+                labelExtra2.setText("Compleanno:");
+                labelRuolo.setVisible(false);
+                campoRuolo.setVisible(false);
+                campoExtra1.setPromptText("email@esempio.it");
+                campoExtra2.setPromptText("gg/mm/aaaa (opzionale)");
+                campoExtra1.setVisible(true);
+                campoExtra2.setVisible(true);
+            } else {
+                labelExtra1.setText("Azienda:");
+                labelExtra2.setText("Sede:");
+                labelRuolo.setVisible(true);
+                campoRuolo.setVisible(true);
+                campoExtra1.setPromptText("Nome azienda");
+                campoExtra2.setPromptText("Sede");
+                campoRuolo.setPromptText("Ruolo lavorativo");
+                campoExtra1.setVisible(true);
+                campoExtra2.setVisible(true);
+            }
+        });
+
+        labelExtra1.setText("Email:");
+        labelExtra2.setText("Compleanno:");
+        labelExtra1.setVisible(true);
+        labelExtra2.setVisible(true);
+        campoExtra1.setVisible(true);
+        campoExtra2.setVisible(true);
+        labelRuolo.setVisible(false);
+        campoRuolo.setVisible(false);
+        campoExtra2.setPromptText("gg/mm/aaaa (opzionale)");
+
+        caricaDaFile();
+        aggiornaList();
+    }
+
+    void caricaDaFile() throws FileNotFoundException, IOException {
+        File mioFile = new File(nomeFile);
+
+        if (!mioFile.exists()) {
+            campoRicerca.setText("File non trovato, rubrica vuota");
+            return;
+        }
+
+        try (
+            FileReader leggo = new FileReader(mioFile);
+            BufferedReader lettoreDiRighe = new BufferedReader(leggo);
+        ) {
+            String rigaletta;
+            while ((rigaletta = lettoreDiRighe.readLine()) != null) {
+                String[] parti = rigaletta.split(",");
+
+                if (parti.length < 4) {
+                    continue;
+                }
+
+                if (parti[0].equalsIgnoreCase("Personale")) {
+                    if (parti.length < 5) {
+                        continue;
+                    }
+                    String email = parti[4];
+                    String compleanno = (parti.length > 5) ? parti[5] : "";
+                    ContattoPersonale icPersonali = new ContattoPersonale(parti[1], parti[2], parti[3], email, compleanno);
+                    rubrica.add(icPersonali);
+                }
+                else if (parti[0].equals("Aziendale") && parti.length >= 6) {
+                    String azienda = parti[4];
+                    String ruolo = parti[5];
+                    ContattoAziendale c = new ContattoAziendale(parti[1], parti[2], parti[3], azienda, ruolo);
+                    rubrica.add(c);
+                }
+            }
+        }
+    }
+
+    void salvaSuFile() {
+        try {
+            FileWriter flussoCaratteri = new FileWriter(nomeFile);
+            for (int i = 0; i < rubrica.size(); i++) {
+                Contatto c = rubrica.get(i);
+                flussoCaratteri.write(c.toString() + "\n");
+            }
+            flussoCaratteri.close();
+            System.out.println("Salvati " + rubrica.size() + " contatti");
+        } catch (IOException e) {
+            System.err.println("Errore salvataggio: " + e.getMessage());
+        }
+    }
+
+    void aggiornaList() {
+        listaContatti.getItems().clear();
+        String testoRicerca = "";
+
+        if (campoRicerca != null) {
+            testoRicerca = campoRicerca.getText().toLowerCase();
+        }
+
+        for (int i = 0; i < rubrica.size(); i++) {
+            Contatto c = rubrica.get(i);
+
+            if (testoRicerca.isEmpty()) {
+                listaContatti.getItems().add(c);
+            } else {
+                boolean nomeTrovato = c.nome.toLowerCase().contains(testoRicerca);
+                boolean cognomeTrovato = c.cognome.toLowerCase().contains(testoRicerca);
+                if (nomeTrovato || cognomeTrovato) {
+                    listaContatti.getItems().add(c);
+                }
+            }
+        }
+    }
+
+    boolean campiPersonaleValid() {
+        if (campoNome.getText().isEmpty()) {
+            mostraErrore("Il nome è obbligatorio!");
+            return false;
+        }
+        if (campoCognome.getText().isEmpty()) {
+            mostraErrore("Il cognome è obbligatorio!");
+            return false;
+        }
+        if (campoTelefono.getText().isEmpty()) {
+            mostraErrore("Il telefono è obbligatorio!");
+            return false;
+        }
+        if (campoExtra1.getText().isEmpty()) {
+            mostraErrore("L'email è obbligatoria!");
+            return false;
+        }
+        // Compleanno NON è obbligatorio
+        return true;
+    }
+
+    boolean campiAziendaleValid() {
+        if (campoNome.getText().isEmpty()) {
+            mostraErrore("Il nome è obbligatorio!");
+            return false;
+        }
+        if (campoCognome.getText().isEmpty()) {
+            mostraErrore("Il cognome è obbligatorio!");
+            return false;
+        }
+        if (campoTelefono.getText().isEmpty()) {
+            mostraErrore("Il telefono è obbligatorio!");
+            return false;
+        }
+        if (campoExtra1.getText().isEmpty()) {
+            mostraErrore("L'azienda è obbligatoria!");
+            return false;
+        }
+        if (campoExtra2.getText().isEmpty()) {
+            mostraErrore("La sede è obbligatoria!");
+            return false;
+        }
+        if (campoRuolo.getText().isEmpty()) {
+            mostraErrore("Il ruolo è obbligatorio!");
+            return false;
+        }
+        return true;
+    }
+
+    @FXML
+    public void aggiungiContatto() {
+        String tipo = comboTipo.getValue();
+        Contatto nuovo = null;
+
+        if (tipo.equals("Personale")) {
+            if (!campiPersonaleValid()) {
+                return;
+            }
+            nuovo = new ContattoPersonale(
+                campoNome.getText(),
+                campoCognome.getText(),
+                campoTelefono.getText(),
+                campoExtra1.getText(),
+                campoExtra2.getText()
+            );
+        } else {
+            if (!campiAziendaleValid()) {
+                return;
+            }
+            nuovo = new ContattoAziendale(
+                campoNome.getText(),
+                campoCognome.getText(),
+                campoTelefono.getText(),
+                campoExtra1.getText(),
+                campoRuolo.getText()
+            );
+        }
+
+        if (nuovo != null) {
+            rubrica.add(nuovo);
+            campoNome.clear();
+            campoCognome.clear();
+            campoTelefono.clear();
+            campoExtra1.clear();
+            campoExtra2.clear();
+            campoRuolo.clear();
+            salvaSuFile();
+            aggiornaList();
+            System.out.println("Contatto aggiunto");
+        }
+    }
+
+    @FXML
+    public void eliminaContatto() {
+        Contatto selezionato = listaContatti.getSelectionModel().getSelectedItem();
+
+        if (selezionato != null) {
+            rubrica.remove(selezionato);
+            salvaSuFile();
+            aggiornaList();
+            System.out.println("Contatto eliminato");
+        } else {
+            mostraErrore("Seleziona un contatto dalla lista!");
+        }
+    }
+
+    @FXML
+    public void pulisciRicerca() {
+        campoRicerca.clear();
+        aggiornaList();
+    }
+    void mostraErrore(String messaggio) {
+        Alert alert = new Alert(Alert.AlertType.ERROR, messaggio, ButtonType.OK);
+        alert.showAndWait();
+    }
+    @FXML
+    public void modificaContatto(MouseEvent event) {
+        if (event.getClickCount() == 2) {
+            Contatto selezionato = listaContatti.getSelectionModel().getSelectedItem();
+
+            if (selezionato == null) {
+                mostraErrore("Seleziona un contatto da modificare!");
+                return;
+            }
+
+            campoNome.setText(selezionato.nome);
+            campoCognome.setText(selezionato.cognome);
+            campoTelefono.setText(selezionato.telefono);
+
+            if (selezionato instanceof ContattoPersonale) {
+                comboTipo.setValue("Personale");
+                ContattoPersonale persona = (ContattoPersonale) selezionato;
+                campoExtra1.setText(persona.email);
+                campoExtra2.setText(persona.compleanno);
+                campoRuolo.clear();
+            } else if (selezionato instanceof ContattoAziendale) {
+                comboTipo.setValue("Aziendale");
+                ContattoAziendale azienda = (ContattoAziendale) selezionato;
+                campoExtra1.setText(azienda.azienda);
+                campoRuolo.setText(azienda.ruolo);
+                campoExtra2.clear();
+            }
+
+            rubrica.remove(selezionato);
+            aggiornaList();
+            campoNome.requestFocus();
+        }
+    }
+}
+
+  

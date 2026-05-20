@@ -14,11 +14,8 @@ public class ContattoAziendale extends Contatto {
         return "Aziendale";
     }
 
-    public String toCSV() {
-        return getTipo() + "," + nome + "," + cognome + "," + telefono + "," + azienda + "," + ruolo;
-    }
 
     public String toString() {
-        return "[Aziendale] " + nome + " " + cognome + " - " + telefono + " - " + azienda + " (" + ruolo + ")";
+        return getTipo() + "," + nome + "," + cognome + "," + telefono + "," + azienda + "," + ruolo;
     }
 }
