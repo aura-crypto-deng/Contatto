@@ -14,11 +14,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-
 public class RubricaPerfetta extends Application {
-
     @FXML TextField campoRicerca;
     @FXML ListView<Contatto> listaContatti;
     @FXML ComboBox<String> comboTipo;
@@ -31,8 +28,7 @@ public class RubricaPerfetta extends Application {
     @FXML Label labelExtra1;
     @FXML Label labelExtra2;
     @FXML Label labelRuolo;
-
-    String nomeFile = "/Users/nishuli/Desktop/rubrica.csv";
+    String nomeFile = "/Users/deng/Desktop/rubrica.csv";
     ArrayList<Contatto> rubrica = new ArrayList<>();
 
     @Override
@@ -54,6 +50,10 @@ public class RubricaPerfetta extends Application {
         comboTipo.getItems().addAll("Personale", "Aziendale");
         comboTipo.setValue("Personale");
 
+        campoRicerca.textProperty().addListener((obs, vecchio, nuovo) -> {
+            aggiornaList();
+        });
+
         comboTipo.valueProperty().addListener((obs, vecchio, nuovo) -> {
             if (nuovo.equals("Personale")) {
                 labelExtra1.setText("Email:");
@@ -62,8 +62,6 @@ public class RubricaPerfetta extends Application {
                 campoRuolo.setVisible(false);
                 campoExtra1.setPromptText("email@esempio.it");
                 campoExtra2.setPromptText("gg/mm/aaaa (opzionale)");
-                campoExtra1.setVisible(true);
-                campoExtra2.setVisible(true);
             } else {
                 labelExtra1.setText("Azienda:");
                 labelExtra2.setText("Sede:");
@@ -72,25 +70,22 @@ public class RubricaPerfetta extends Application {
                 campoExtra1.setPromptText("Nome azienda");
                 campoExtra2.setPromptText("Sede");
                 campoRuolo.setPromptText("Ruolo lavorativo");
-                campoExtra1.setVisible(true);
-                campoExtra2.setVisible(true);
             }
+            campoExtra1.setVisible(true);
+            campoExtra2.setVisible(true);
         });
-
         labelExtra1.setText("Email:");
         labelExtra2.setText("Compleanno:");
-        labelExtra1.setVisible(true);
-        labelExtra2.setVisible(true);
-        campoExtra1.setVisible(true);
-        campoExtra2.setVisible(true);
         labelRuolo.setVisible(false);
         campoRuolo.setVisible(false);
+        campoExtra1.setPromptText("email@esempio.it");
         campoExtra2.setPromptText("gg/mm/aaaa (opzionale)");
+        campoExtra1.setVisible(true);
+        campoExtra2.setVisible(true);
 
         caricaDaFile();
         aggiornaList();
     }
-
     void caricaDaFile() throws FileNotFoundException, IOException {
         File mioFile = new File(nomeFile);
 
@@ -99,35 +94,35 @@ public class RubricaPerfetta extends Application {
             return;
         }
 
-        try (
-            FileReader leggo = new FileReader(mioFile);
-            BufferedReader lettoreDiRighe = new BufferedReader(leggo);
-        ) {
-            String rigaletta;
-            while ((rigaletta = lettoreDiRighe.readLine()) != null) {
-                String[] parti = rigaletta.split(",");
-
-                if (parti.length < 4) {
-                    continue;
-                }
-
+        FileReader leggo = new FileReader(mioFile);
+        BufferedReader lettoreDiRighe = new BufferedReader(leggo);
+        String rigaletta;
+        while ((rigaletta = lettoreDiRighe.readLine()) != null) {
+            String[] parti = rigaletta.split(",");
+            if (parti.length >= 4) {
                 if (parti[0].equalsIgnoreCase("Personale")) {
-                    if (parti.length < 5) {
-                        continue;
+                    if (parti.length >= 5) {
+                        String email = parti[4];
+                        String compleanno = "";
+                        if (parti.length > 5) {
+                            compleanno = parti[5];
+                        }
+                        ContattoPersonale icPersonali = new ContattoPersonale(parti[1], parti[2], parti[3], email, compleanno);
+                        rubrica.add(icPersonali);
                     }
-                    String email = parti[4];
-                    String compleanno = (parti.length > 5) ? parti[5] : "";
-                    ContattoPersonale icPersonali = new ContattoPersonale(parti[1], parti[2], parti[3], email, compleanno);
-                    rubrica.add(icPersonali);
                 }
-                else if (parti[0].equals("Aziendale") && parti.length >= 6) {
-                    String azienda = parti[4];
-                    String ruolo = parti[5];
-                    ContattoAziendale c = new ContattoAziendale(parti[1], parti[2], parti[3], azienda, ruolo);
-                    rubrica.add(c);
+                else if (parti[0].equals("Aziendale")) {
+                    if (parti.length >= 7) {
+                        String azienda = parti[4];
+                        String sede = parti[5];
+                        String ruolo = parti[6];
+                        ContattoAziendale c = new ContattoAziendale(parti[1], parti[2], parti[3], azienda, sede, ruolo);
+                        rubrica.add(c);
+                    }
                 }
             }
         }
+        lettoreDiRighe.close();
     }
 
     void salvaSuFile() {
@@ -147,14 +142,11 @@ public class RubricaPerfetta extends Application {
     void aggiornaList() {
         listaContatti.getItems().clear();
         String testoRicerca = "";
-
         if (campoRicerca != null) {
             testoRicerca = campoRicerca.getText().toLowerCase();
         }
-
         for (int i = 0; i < rubrica.size(); i++) {
             Contatto c = rubrica.get(i);
-
             if (testoRicerca.isEmpty()) {
                 listaContatti.getItems().add(c);
             } else {
@@ -184,7 +176,6 @@ public class RubricaPerfetta extends Application {
             mostraErrore("L'email è obbligatoria!");
             return false;
         }
-        // Compleanno NON è obbligatorio
         return true;
     }
 
@@ -222,29 +213,27 @@ public class RubricaPerfetta extends Application {
         Contatto nuovo = null;
 
         if (tipo.equals("Personale")) {
-            if (!campiPersonaleValid()) {
-                return;
+            if (campiPersonaleValid()) {
+                nuovo = new ContattoPersonale(
+                    campoNome.getText(),
+                    campoCognome.getText(),
+                    campoTelefono.getText(),
+                    campoExtra1.getText(),
+                    campoExtra2.getText()
+                );
             }
-            nuovo = new ContattoPersonale(
-                campoNome.getText(),
-                campoCognome.getText(),
-                campoTelefono.getText(),
-                campoExtra1.getText(),
-                campoExtra2.getText()
-            );
         } else {
-            if (!campiAziendaleValid()) {
-                return;
+            if (campiAziendaleValid()) {
+                nuovo = new ContattoAziendale(
+                    campoNome.getText(),
+                    campoCognome.getText(),
+                    campoTelefono.getText(),
+                    campoExtra1.getText(),    
+                    campoExtra2.getText(),    
+                    campoRuolo.getText()      
+                );
             }
-            nuovo = new ContattoAziendale(
-                campoNome.getText(),
-                campoCognome.getText(),
-                campoTelefono.getText(),
-                campoExtra1.getText(),
-                campoRuolo.getText()
-            );
         }
-
         if (nuovo != null) {
             rubrica.add(nuovo);
             campoNome.clear();
@@ -262,7 +251,6 @@ public class RubricaPerfetta extends Application {
     @FXML
     public void eliminaContatto() {
         Contatto selezionato = listaContatti.getSelectionModel().getSelectedItem();
-
         if (selezionato != null) {
             rubrica.remove(selezionato);
             salvaSuFile();
@@ -278,10 +266,12 @@ public class RubricaPerfetta extends Application {
         campoRicerca.clear();
         aggiornaList();
     }
+
     void mostraErrore(String messaggio) {
         Alert alert = new Alert(Alert.AlertType.ERROR, messaggio, ButtonType.OK);
         alert.showAndWait();
     }
+
     @FXML
     public void modificaContatto(MouseEvent event) {
         if (event.getClickCount() == 2) {
@@ -296,23 +286,26 @@ public class RubricaPerfetta extends Application {
             campoCognome.setText(selezionato.cognome);
             campoTelefono.setText(selezionato.telefono);
 
-            if (selezionato instanceof ContattoPersonale) {
+            if (selezionato.getTipo().equalsIgnoreCase("Personale")) {
                 comboTipo.setValue("Personale");
                 ContattoPersonale persona = (ContattoPersonale) selezionato;
                 campoExtra1.setText(persona.email);
                 campoExtra2.setText(persona.compleanno);
                 campoRuolo.clear();
-            } else if (selezionato instanceof ContattoAziendale) {
+                campoRuolo.setVisible(false);
+                labelRuolo.setVisible(false);
+            } else if (selezionato.getTipo().equalsIgnoreCase("Aziendale")) {
                 comboTipo.setValue("Aziendale");
                 ContattoAziendale azienda = (ContattoAziendale) selezionato;
                 campoExtra1.setText(azienda.azienda);
-                campoRuolo.setText(azienda.ruolo);
-                campoExtra2.clear();
+                campoExtra2.setText(azienda.sede); 
+                campoRuolo.setText(azienda.ruolo);  
+                campoRuolo.setVisible(true);
+                labelRuolo.setVisible(true);
             }
 
             rubrica.remove(selezionato);
             aggiornaList();
-            campoNome.requestFocus();
         }
     }
 }
