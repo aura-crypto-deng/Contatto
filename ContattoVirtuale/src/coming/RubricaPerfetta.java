@@ -29,6 +29,7 @@ public class RubricaPerfetta extends Application {
     @FXML Label labelExtra2;
     @FXML Label labelRuolo;
     @FXML Button buttonAggiungi;
+    boolean elimina=false;
     String nomeFile = "/Users/deng/Desktop/rubrica.csv";
     ArrayList<Contatto> rubrica = new ArrayList<>();
     Contatto contattoInModifica = null;
@@ -36,7 +37,7 @@ public class RubricaPerfetta extends Application {
     public void start(Stage finestra) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("rubrica.fxml"));
         Parent root = loader.load();
-        Scene scena = new Scene(root, 520, 650);
+        Scene scena = new Scene(root);
         finestra.setTitle("Rubrica Telefonica");
         finestra.setScene(scena);
         finestra.show();
@@ -288,7 +289,8 @@ public class RubricaPerfetta extends Application {
             rubrica.remove(selezionato);
             salvaSuFile();
             aggiornaList();
-            System.out.println("Contatto eliminato");
+            elimina=true;
+            mostraErrore(selezionato.toString()+"          Eliminato");
         } else {
             mostraErrore("Seleziona un contatto dalla lista!");
         }
@@ -299,8 +301,15 @@ public class RubricaPerfetta extends Application {
         aggiornaList();
     }
     void mostraErrore(String messaggio) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, messaggio, ButtonType.OK);
-        alert.showAndWait();
+    	if(elimina) {
+    		Alert alert = new Alert(Alert.AlertType.WARNING, messaggio, ButtonType.OK);
+            alert.showAndWait();
+            elimina=false;
+    	}else {
+    		Alert alert = new Alert(Alert.AlertType.ERROR, messaggio, ButtonType.OK);
+            alert.showAndWait();
+    	}
+        
     }
     @FXML
     public void modificaContatto(MouseEvent event) {
