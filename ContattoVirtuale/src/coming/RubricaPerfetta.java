@@ -28,9 +28,9 @@ public class RubricaPerfetta extends Application {
     @FXML Label labelExtra1;
     @FXML Label labelExtra2;
     @FXML Label labelRuolo;
+    @FXML Button buttonAggiungi;
     String nomeFile = "/Users/deng/Desktop/rubrica.csv";
     ArrayList<Contatto> rubrica = new ArrayList<>();
-
     @Override
     public void start(Stage finestra) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("rubrica.fxml"));
@@ -40,11 +40,9 @@ public class RubricaPerfetta extends Application {
         finestra.setScene(scena);
         finestra.show();
     }
-
     public static void main(String[] args) {
         launch(args);
     }
-
     @FXML
     public void initialize() throws FileNotFoundException, IOException {
         comboTipo.getItems().addAll("Personale", "Aziendale");
@@ -206,7 +204,6 @@ public class RubricaPerfetta extends Application {
         }
         return true;
     }
-
     @FXML
     public void aggiungiContatto() {
         String tipo = comboTipo.getValue();
@@ -247,7 +244,6 @@ public class RubricaPerfetta extends Application {
             System.out.println("Contatto aggiunto");
         }
     }
-
     @FXML
     public void eliminaContatto() {
         Contatto selezionato = listaContatti.getSelectionModel().getSelectedItem();
@@ -260,32 +256,26 @@ public class RubricaPerfetta extends Application {
             mostraErrore("Seleziona un contatto dalla lista!");
         }
     }
-
     @FXML
     public void pulisciRicerca() {
         campoRicerca.clear();
         aggiornaList();
     }
-
     void mostraErrore(String messaggio) {
         Alert alert = new Alert(Alert.AlertType.ERROR, messaggio, ButtonType.OK);
         alert.showAndWait();
     }
-
     @FXML
     public void modificaContatto(MouseEvent event) {
         if (event.getClickCount() == 2) {
             Contatto selezionato = listaContatti.getSelectionModel().getSelectedItem();
-
             if (selezionato == null) {
                 mostraErrore("Seleziona un contatto da modificare!");
                 return;
             }
-
             campoNome.setText(selezionato.nome);
             campoCognome.setText(selezionato.cognome);
             campoTelefono.setText(selezionato.telefono);
-
             if (selezionato.getTipo().equalsIgnoreCase("Personale")) {
                 comboTipo.setValue("Personale");
                 ContattoPersonale persona = (ContattoPersonale) selezionato;
