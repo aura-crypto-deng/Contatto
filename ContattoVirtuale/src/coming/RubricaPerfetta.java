@@ -208,7 +208,6 @@ public class RubricaPerfetta extends Application {
     public void aggiungiContatto() {
         String tipo = comboTipo.getValue();
         Contatto nuovo = null;
-
         if (tipo.equals("Personale")) {
             if (campiPersonaleValid()) {
                 nuovo = new ContattoPersonale(
@@ -225,9 +224,9 @@ public class RubricaPerfetta extends Application {
                     campoNome.getText(),
                     campoCognome.getText(),
                     campoTelefono.getText(),
-                    campoExtra1.getText(),    
-                    campoExtra2.getText(),    
-                    campoRuolo.getText()      
+                    campoExtra1.getText(),
+                    campoExtra2.getText(),
+                    campoRuolo.getText()
                 );
             }
         }
@@ -241,7 +240,9 @@ public class RubricaPerfetta extends Application {
             campoRuolo.clear();
             salvaSuFile();
             aggiornaList();
-            System.out.println("Contatto aggiunto");
+            buttonAggiungi.setStyle("");
+            buttonAggiungi.setText("Aggiungi Contatto");
+            System.out.println("Contatto salvato!");
         }
     }
     @FXML
@@ -273,6 +274,8 @@ public class RubricaPerfetta extends Application {
                 mostraErrore("Seleziona un contatto da modificare!");
                 return;
             }
+            buttonAggiungi.setStyle("-fx-background-color: #ff9800; -fx-text-fill: white;");
+            buttonAggiungi.setText("SALVA MODIFICHE");
             campoNome.setText(selezionato.nome);
             campoCognome.setText(selezionato.cognome);
             campoTelefono.setText(selezionato.telefono);
@@ -288,14 +291,14 @@ public class RubricaPerfetta extends Application {
                 comboTipo.setValue("Aziendale");
                 ContattoAziendale azienda = (ContattoAziendale) selezionato;
                 campoExtra1.setText(azienda.azienda);
-                campoExtra2.setText(azienda.sede); 
-                campoRuolo.setText(azienda.ruolo);  
+                campoExtra2.setText(azienda.sede);
+                campoRuolo.setText(azienda.ruolo);
                 campoRuolo.setVisible(true);
                 labelRuolo.setVisible(true);
             }
-
             rubrica.remove(selezionato);
             aggiornaList();
+            System.out.println("Modalita modifica: modifica i campi e premi SALVA MODIFICHE");
         }
     }
 }
