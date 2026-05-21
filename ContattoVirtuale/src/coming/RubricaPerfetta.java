@@ -31,6 +31,7 @@ public class RubricaPerfetta extends Application {
     @FXML Button buttonAggiungi;
     String nomeFile = "/Users/deng/Desktop/rubrica.csv";
     ArrayList<Contatto> rubrica = new ArrayList<>();
+    Contatto contattoInModifica = null;
     @Override
     public void start(Stage finestra) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("rubrica.fxml"));
@@ -208,6 +209,42 @@ public class RubricaPerfetta extends Application {
     public void aggiungiContatto() {
         String tipo = comboTipo.getValue();
         Contatto nuovo = null;
+        if (contattoInModifica != null) {
+            if (tipo.equals("Personale")) {
+                if (campiPersonaleValid()) {
+                    nuovo = new ContattoPersonale(
+                        campoNome.getText(),
+                        campoCognome.getText(),
+                        campoTelefono.getText(),
+                        campoExtra1.getText(),
+                        campoExtra2.getText()
+                    );
+                }
+            } else {
+                if (campiAziendaleValid()) {
+                    nuovo = new ContattoAziendale(
+                        campoNome.getText(),
+                        campoCognome.getText(),
+                        campoTelefono.getText(),
+                        campoExtra1.getText(),
+                        campoExtra2.getText(),
+                        campoRuolo.getText()
+                    );
+                }
+            }
+            if (nuovo != null) {
+                rubrica.remove(contattoInModifica);
+                rubrica.add(nuovo);
+                contattoInModifica = null; 
+                buttonAggiungi.setStyle("");
+                buttonAggiungi.setText("Aggiungi Contatto");
+                listaContatti.setStyle("");
+                salvaSuFile();
+                aggiornaList();
+                System.out.println("Contatto modificato e salvato!");
+            }
+            return;
+        }
         if (tipo.equals("Personale")) {
             if (campiPersonaleValid()) {
                 nuovo = new ContattoPersonale(
@@ -230,6 +267,7 @@ public class RubricaPerfetta extends Application {
                 );
             }
         }
+
         if (nuovo != null) {
             rubrica.add(nuovo);
             campoNome.clear();
@@ -240,9 +278,7 @@ public class RubricaPerfetta extends Application {
             campoRuolo.clear();
             salvaSuFile();
             aggiornaList();
-            buttonAggiungi.setStyle("");
-            buttonAggiungi.setText("Aggiungi Contatto");
-            System.out.println("Contatto salvato!");
+            System.out.println("Contatto aggiunto");
         }
     }
     @FXML
@@ -274,8 +310,11 @@ public class RubricaPerfetta extends Application {
                 mostraErrore("Seleziona un contatto da modificare!");
                 return;
             }
+            contattoInModifica = selezionato;
             buttonAggiungi.setStyle("-fx-background-color: #ff9800; -fx-text-fill: white;");
             buttonAggiungi.setText("SALVA MODIFICHE");
+            listaContatti.getSelectionModel().select(selezionato);
+            listaContatti.setStyle(".list-cell:selected { -fx-background-color: #a0a0a0; -fx-text-fill: white; }" );
             campoNome.setText(selezionato.nome);
             campoCognome.setText(selezionato.cognome);
             campoTelefono.setText(selezionato.telefono);
@@ -296,8 +335,6 @@ public class RubricaPerfetta extends Application {
                 campoRuolo.setVisible(true);
                 labelRuolo.setVisible(true);
             }
-            rubrica.remove(selezionato);
-            aggiornaList();
             System.out.println("Modalita modifica: modifica i campi e premi SALVA MODIFICHE");
         }
     }
