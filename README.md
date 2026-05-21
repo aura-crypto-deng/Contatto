@@ -1,32 +1,19 @@
-# Rubrica Telefonica
-Studente: Yuhao Deng
+# Rubrica Telefonica - Yuhao Deng
 
-## Struttura
-Deng_Yuhao_Rubrica.zip/
-├── src/coming/
-│   ├── RubricaPerfetta.java
-│   ├── Contatto.java
-│   ├── ContattoPersonale.java
-│   ├── ContattoAziendale.java
-│   └── rubrica.fxml
-└── rubrica.csv
+## File
+- `RubricaPerfetta.java` - Main e controller
+- `Contatto.java` - Classe base
+- `ContattoPersonale.java` - Sottoclasse Personale
+- `ContattoAziendale.java` - Sottoclasse Aziendale
+- `rubrica.fxml` - Layout interfaccia
+- `rubrica.csv` - Dati salvati
 
-## Funzionalita
-- Aggiungi contatto (Personale/Aziendale)
-- Ricerca per nome/cognome
-- Elimina contatto
-- Modifica con doppio clic
-- Salvataggio su CSV
-- Caricamento all'avvio
+## Funzioni
+- Aggiungi, elimina, modifica, cerca, salva, carica
 
-## Formato CSV (separatore virgola)
-Personale,Mario,Rossi,3331234567,mario@email.it,15/03/1990
-Personale,Luca,Bianchi,3479988776,luca@gmail.com
-Aziendale,Anna,Verdi,0287654321,Tech SRL,Sviluppatrice
+## CSV (separatore virgola)
+Personale,Nome,Cognome,Telefono,Email,Compleanno
+Aziendale,Nome,Cognome,Telefono,Azienda,Sede,Ruolo
 
-## Requisiti
-- Java 11+
-- JavaFX
-
-## Esecuzione
-Eseguire la classe RubricaPerfetta
+## Esegui
+Classe `RubricaPerfetta`
