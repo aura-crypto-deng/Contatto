@@ -84,7 +84,6 @@ public class RubricaPerfetta extends Application {
         campoExtra2.setPromptText("gg/mm/aaaa (opzionale)");
         campoExtra1.setVisible(true);
         campoExtra2.setVisible(true);
-
         caricaDaFile();
         aggiornaList();
     }
@@ -95,7 +94,6 @@ public class RubricaPerfetta extends Application {
             campoRicerca.setText("File non trovato, rubrica vuota");
             return;
         }
-
         FileReader leggo = new FileReader(mioFile);
         BufferedReader lettoreDiRighe = new BufferedReader(leggo);
         String rigaletta;
@@ -310,7 +308,6 @@ public class RubricaPerfetta extends Application {
     		Alert alert = new Alert(Alert.AlertType.ERROR, messaggio, ButtonType.OK);
             alert.showAndWait();
     	}
-        
     }
     @FXML
     public void modificaContatto(MouseEvent event) {
@@ -321,32 +318,31 @@ public class RubricaPerfetta extends Application {
         if (event.getClickCount() == 1) {
             mostraDettagli(selezionato);
         }
-        if (event.getClickCount() == 2) {
-            contattoInModifica = selezionato;
-            buttonAggiungi.setStyle("-fx-background-color: #ff9800; -fx-text-fill: white;");
-            buttonAggiungi.setText("SALVA MODIFICHE");
-            campoNome.setText(selezionato.nome);
-            campoCognome.setText(selezionato.cognome);
-            campoTelefono.setText(selezionato.telefono);
-
-            if (selezionato.getTipo().equalsIgnoreCase("Personale")) {
-                comboTipo.setValue("Personale");
-                ContattoPersonale persona = (ContattoPersonale) selezionato;
-                campoExtra1.setText(persona.email);
-                campoExtra2.setText(persona.compleanno);
-                campoRuolo.clear();
-                campoRuolo.setVisible(false);
-                labelRuolo.setVisible(false);
-            } else if (selezionato.getTipo().equalsIgnoreCase("Aziendale")) {
-                comboTipo.setValue("Aziendale");
-                ContattoAziendale azienda = (ContattoAziendale) selezionato;
-                campoExtra1.setText(azienda.azienda);
-                campoExtra2.setText(azienda.sede);
-                campoRuolo.setText(azienda.ruolo);
-                campoRuolo.setVisible(true);
-                labelRuolo.setVisible(true);
-            }
-            System.out.println("Modalita modifica: modifica i campi e premi SALVA MODIFICHE");
+    }
+    public void modificaContatto(Contatto selezionato) {
+        contattoInModifica = selezionato;
+        buttonAggiungi.setStyle("-fx-background-color: #ff9800; -fx-text-fill: white;");
+        buttonAggiungi.setText("SALVA MODIFICHE");
+        campoNome.setText(selezionato.nome);
+        campoCognome.setText(selezionato.cognome);
+        campoTelefono.setText(selezionato.telefono);
+        
+        if (selezionato.getTipo().equalsIgnoreCase("Personale")) {
+            comboTipo.setValue("Personale");
+            ContattoPersonale persona = (ContattoPersonale) selezionato;
+            campoExtra1.setText(persona.email);
+            campoExtra2.setText(persona.compleanno);
+            campoRuolo.clear();
+            campoRuolo.setVisible(false);
+            labelRuolo.setVisible(false);
+        } else if (selezionato.getTipo().equalsIgnoreCase("Aziendale")) {
+            comboTipo.setValue("Aziendale");
+            ContattoAziendale azienda = (ContattoAziendale) selezionato;
+            campoExtra1.setText(azienda.azienda);
+            campoExtra2.setText(azienda.sede);
+            campoRuolo.setText(azienda.ruolo);
+            campoRuolo.setVisible(true);
+            labelRuolo.setVisible(true);
         }
     }
     void mostraDettagli(Contatto contatto) {
@@ -393,11 +389,15 @@ public class RubricaPerfetta extends Application {
             griglia.add(new Label("Ruolo:"), 0, riga);
             griglia.add(new Label(aziendale.ruolo), 1, riga);
         }
+        Button bModifica = new Button("modifica");
         Button btnChiudi = new Button("Chiudi");
         Button bElimina=new Button("elimina");
+        
         btnChiudi.setOnAction(e -> finestraDettagli.close());
         bElimina.setOnAction(e-> eliminaContatto());
+        bModifica.setOnAction(e -> {finestraDettagli.close();modificaContatto(contatto);});
         riga++;
+        griglia.add(bModifica, 2, riga,2,1);
         griglia.add(btnChiudi, 0, riga, 2, 1);
         griglia.add(bElimina, 1, riga,2,1);
         Scene scena = new Scene(griglia, 350, 350);
