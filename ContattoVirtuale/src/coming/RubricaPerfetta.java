@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -38,6 +39,7 @@ public class RubricaPerfetta extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("rubrica.fxml"));
         Parent root = loader.load();
         Scene scena = new Scene(root);
+        scena.getStylesheets().add(getClass().getResource("RubricaPerfetta.css").toExternalForm());
         finestra.setTitle("Rubrica Telefonica");
         finestra.setScene(scena);
         finestra.show();
@@ -130,7 +132,7 @@ public class RubricaPerfetta extends Application {
             FileWriter flussoCaratteri = new FileWriter(nomeFile);
             for (int i = 0; i < rubrica.size(); i++) {
                 Contatto c = rubrica.get(i);
-                flussoCaratteri.write(c.toString() + "\n");
+                flussoCaratteri.write(c.toCSV() + "\n");
             }
             flussoCaratteri.close();
             System.out.println("Salvati " + rubrica.size() + " contatti");
@@ -282,7 +284,6 @@ public class RubricaPerfetta extends Application {
             System.out.println("Contatto aggiunto");
         }
     }
-    @FXML
     public void eliminaContatto() {
         Contatto selezionato = listaContatti.getSelectionModel().getSelectedItem();
         if (selezionato != null) {
@@ -290,7 +291,7 @@ public class RubricaPerfetta extends Application {
             salvaSuFile();
             aggiornaList();
             elimina=true;
-            mostraErrore(selezionato.toString()+"          Eliminato");
+            mostraErrore(selezionato.toString()+"   Eliminato!!!");
         } else {
             mostraErrore("Seleziona un contatto dalla lista!");
         }
@@ -313,20 +314,21 @@ public class RubricaPerfetta extends Application {
     }
     @FXML
     public void modificaContatto(MouseEvent event) {
+        Contatto selezionato = listaContatti.getSelectionModel().getSelectedItem();
+        if (selezionato == null) {
+            return;
+        }
+        if (event.getClickCount() == 1) {
+            mostraDettagli(selezionato);
+        }
         if (event.getClickCount() == 2) {
-            Contatto selezionato = listaContatti.getSelectionModel().getSelectedItem();
-            if (selezionato == null) {
-                mostraErrore("Seleziona un contatto da modificare!");
-                return;
-            }
             contattoInModifica = selezionato;
             buttonAggiungi.setStyle("-fx-background-color: #ff9800; -fx-text-fill: white;");
             buttonAggiungi.setText("SALVA MODIFICHE");
-            listaContatti.getSelectionModel().select(selezionato);
-            listaContatti.setStyle(".list-cell:selected { -fx-background-color: #a0a0a0; -fx-text-fill: white; }" );
             campoNome.setText(selezionato.nome);
             campoCognome.setText(selezionato.cognome);
             campoTelefono.setText(selezionato.telefono);
+
             if (selezionato.getTipo().equalsIgnoreCase("Personale")) {
                 comboTipo.setValue("Personale");
                 ContattoPersonale persona = (ContattoPersonale) selezionato;
@@ -346,6 +348,61 @@ public class RubricaPerfetta extends Application {
             }
             System.out.println("Modalita modifica: modifica i campi e premi SALVA MODIFICHE");
         }
+    }
+    void mostraDettagli(Contatto contatto) {
+        Stage finestraDettagli = new Stage();
+        finestraDettagli.setTitle("Dettagli Contatto");
+        GridPane griglia = new GridPane();
+        griglia.setHgap(10);
+        griglia.setVgap(10);
+        griglia.setStyle("-fx-padding: 20; -fx-background-color: #f5f5f5;");
+        int riga = 0;
+        griglia.add(new Label("Tipo:"), 0, riga);
+        griglia.add(new Label(contatto.getTipo()), 1, riga);
+        riga++;
+        griglia.add(new Label("Nome:"), 0, riga);
+        griglia.add(new Label(contatto.nome), 1, riga);
+        riga++;
+        griglia.add(new Label("Cognome:"), 0, riga);
+        griglia.add(new Label(contatto.cognome), 1, riga);
+        riga++;
+        griglia.add(new Label("Telefono:"), 0, riga);
+        griglia.add(new Label(contatto.telefono), 1, riga);
+        if (contatto.getTipo().equalsIgnoreCase("Personale")) {
+            ContattoPersonale personale = (ContattoPersonale) contatto;
+            riga++;
+            griglia.add(new Label("Email:"), 0, riga);
+            griglia.add(new Label(personale.email), 1, riga);
+            riga++;
+            griglia.add(new Label("Compleanno:"), 0, riga);
+            if(personale.compleanno.isEmpty()) {
+            	griglia.add(new Label ("non inserito"),1,riga);
+            }else {
+            	griglia.add(new Label(personale.compleanno), 1, riga);
+            }
+        }
+        else if (contatto.getTipo().equalsIgnoreCase("Aziendale")) {
+            ContattoAziendale aziendale = (ContattoAziendale) contatto;
+            riga++;
+            griglia.add(new Label("Azienda:"), 0, riga);
+            griglia.add(new Label(aziendale.azienda), 1, riga);
+            riga++;
+            griglia.add(new Label("Sede:"), 0, riga);
+            griglia.add(new Label(aziendale.sede), 1, riga);
+            riga++;
+            griglia.add(new Label("Ruolo:"), 0, riga);
+            griglia.add(new Label(aziendale.ruolo), 1, riga);
+        }
+        Button btnChiudi = new Button("Chiudi");
+        Button bElimina=new Button("elimina");
+        btnChiudi.setOnAction(e -> finestraDettagli.close());
+        bElimina.setOnAction(e-> eliminaContatto());
+        riga++;
+        griglia.add(btnChiudi, 0, riga, 2, 1);
+        griglia.add(bElimina, 1, riga,2,1);
+        Scene scena = new Scene(griglia, 350, 350);
+        finestraDettagli.setScene(scena);
+        finestraDettagli.show();
     }
 }
 

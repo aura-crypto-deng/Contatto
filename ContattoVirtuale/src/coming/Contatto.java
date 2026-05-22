@@ -1,6 +1,6 @@
 package coming;
 
-public abstract class Contatto {
+public class Contatto {
     protected String nome;
     protected String cognome;
     protected String telefono;
@@ -10,19 +10,17 @@ public abstract class Contatto {
         this.cognome = cognome;
         this.telefono = telefono;
     }
-    public Contatto(String riga) {
-    	String [] parti= riga.split(",");
-    	nome =parti[0];
-    	cognome= parti[1];
-    	telefono=parti[2];
-    }
+    
     public String getTipo() {
         return "Base";
     }
-
+    
+    public String toCSV() {
+        return getTipo() + "," + nome + "," + cognome + "," + telefono;
+    }
     
     @Override
     public String toString() {
-        return nome + " " + cognome + " - " + telefono;
+        return nome + " " + cognome;
     }
 }
