@@ -400,7 +400,7 @@ public class RubricaPerfetta extends Application {
         griglia.add(bModifica, 2, riga,2,1);
         griglia.add(btnChiudi, 0, riga, 2, 1);
         griglia.add(bElimina, 1, riga,2,1);
-        Scene scena = new Scene(griglia, 350, 350);
+        Scene scena = new Scene(griglia, 450, 450);
         finestraDettagli.setScene(scena);
         finestraDettagli.show();
     }
